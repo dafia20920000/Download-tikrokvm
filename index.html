@@ -313,8 +313,8 @@
                 <div class="video-container">
                     <video controls class="video-preview" id="video-preview"></video>
                 </div>
-                <a href="#" class="download-btn" id="download-link" download>
-                    <i class="fas fa-file-download"></i> Download Video
+                <a href="#" class="download-btn" id="download-link">
+                    <i class="fas fa-file-download"></i> Download Ulang
                 </a>
             </div>
 
@@ -340,7 +340,7 @@
         </div>
 
         <footer>
-            &copy; 2025 TikTok Downloader Premium | Dibuat dengan dafian project❤️
+            &copy; 2024 TikTok Downloader Premium | Dibuat oleh dafianproject
         </footer>
     </div>
 
@@ -353,6 +353,16 @@
             const errorDiv = document.getElementById('error');
             const videoPreview = document.getElementById('video-preview');
             const downloadLink = document.getElementById('download-link');
+
+            // Fungsi untuk memulai download otomatis
+            function downloadFile(url, filename) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename || 'tiktok-video.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
 
             downloadBtn.addEventListener('click', async function() {
                 const url = tiktokUrl.value.trim();
@@ -379,10 +389,19 @@
                     const data = await response.json();
 
                     if (data.data && data.data.play) {
-                        // Tampilkan hasil
+                        // Tampilkan preview
                         videoPreview.src = data.data.play;
-                        downloadLink.href = data.data.play;
                         resultDiv.classList.add('active');
+                        
+                        // Langsung download video
+                        downloadFile(data.data.play, 'tiktok-video.mp4');
+                        
+                        // Set link untuk download ulang
+                        downloadLink.href = data.data.play;
+                        downloadLink.onclick = (e) => {
+                            e.preventDefault();
+                            downloadFile(data.data.play, 'tiktok-video.mp4');
+                        };
                     } else {
                         showError('Gagal mengunduh video. Coba link lain.');
                     }
