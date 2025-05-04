@@ -189,6 +189,13 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
+        .success-message {
+            color: var(--success);
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
         .error {
             color: var(--error);
             text-align: center;
@@ -306,15 +313,21 @@
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p>Memproses video...</p>
+                <p>Mengunduh video...</p>
             </div>
 
             <div class="result" id="result">
-                <div class="video-container">
-                    <video controls class="video-preview" id="video-preview"></video>
+                <div class="success-message" id="success-message">
+                    <i class="fas fa-check-circle"></i> Video berhasil diunduh!
                 </div>
-                <a href="#" class="download-btn" id="download-link">
-                    <i class="fas fa-file-download"></i> Download Ulang
+                <div class="video-container">
+                    <video controls class="video-preview" id="video-preview" style="display:none;"></video>
+                </div>
+                <a href="#" class="download-btn" id="show-preview-btn">
+                    <i class="fas fa-eye"></i> Tampilkan Preview
+                </a>
+                <a href="#" class="download-btn" id="download-again-btn" style="margin-top:10px;">
+                    <i class="fas fa-redo"></i> Download Ulang
                 </a>
             </div>
 
@@ -351,8 +364,12 @@
             const resultDiv = document.getElementById('result');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
+            const successMsg = document.getElementById('success-message');
             const videoPreview = document.getElementById('video-preview');
-            const downloadLink = document.getElementById('download-link');
+            const showPreviewBtn = document.getElementById('show-preview-btn');
+            const downloadAgainBtn = document.getElementById('download-again-btn');
+
+            let currentVideoUrl = '';
 
             // Fungsi untuk memulai download otomatis
             function downloadFile(url, filename) {
@@ -382,6 +399,7 @@
                     resultDiv.classList.remove('active');
                     errorDiv.textContent = '';
                     loadingDiv.classList.add('active');
+                    videoPreview.style.display = 'none';
 
                     // Gunakan API TikWM
                     const apiUrl = `https://tikwm.com/api/?url=${encodeURIComponent(url)}`;
@@ -389,18 +407,25 @@
                     const data = await response.json();
 
                     if (data.data && data.data.play) {
-                        // Tampilkan preview
-                        videoPreview.src = data.data.play;
-                        resultDiv.classList.add('active');
+                        currentVideoUrl = data.data.play;
                         
                         // Langsung download video
-                        downloadFile(data.data.play, 'tiktok-video.mp4');
+                        downloadFile(currentVideoUrl, 'tiktok-video.mp4');
                         
-                        // Set link untuk download ulang
-                        downloadLink.href = data.data.play;
-                        downloadLink.onclick = (e) => {
+                        // Tampilkan pesan sukses
+                        resultDiv.classList.add('active');
+                        successMsg.style.display = 'block';
+                        
+                        // Set up tombol preview dan download ulang
+                        showPreviewBtn.onclick = (e) => {
                             e.preventDefault();
-                            downloadFile(data.data.play, 'tiktok-video.mp4');
+                            videoPreview.style.display = 'block';
+                            videoPreview.src = currentVideoUrl;
+                        };
+                        
+                        downloadAgainBtn.onclick = (e) => {
+                            e.preventDefault();
+                            downloadFile(currentVideoUrl, 'tiktok-video.mp4');
                         };
                     } else {
                         showError('Gagal mengunduh video. Coba link lain.');
