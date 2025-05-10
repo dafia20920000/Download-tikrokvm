@@ -1,293 +1,362 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>No 18+ • Premium Tracker</title>
+    <title>No18+ Tracker Premium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #8a2be2;
-            --success: #00c853;
-            --fail: #ff3d00;
-            --bg: #121212;
-            --card: #1e1e1e;
-            --text: #e0e0e0;
+            --primary: #7b2cbf;
+            --secondary: #240046;
+            --success: #38b000;
+            --danger: #d00000;
+            --light: #f8f9fa;
+            --dark: #212529;
         }
-        body {
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f5f5, #e9ecef);
             min-height: 100vh;
+            padding: 2rem;
+            color: var(--dark);
         }
-        .container {
-            max-width: 1000px;
+        
+        .app-container {
+            max-width: 1200px;
             margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
+        
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #333;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
         }
-        h1 {
-            margin: 0;
-            font-size: 2.2rem;
-            background: linear-gradient(45deg, #8a2be2, #4b0082);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
-        .stats-card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        
+        header p {
+            opacity: 0.9;
+        }
+        
+        .date-display {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-        .stat {
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-        .success-text { color: var(--success); }
-        .fail-text { color: var(--fail); }
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .day {
-            aspect-ratio: 1/1;
-            background: var(--card);
+        
+        .stat-card {
+            background: white;
             border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .stat-card h3 {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .success .value {
+            color: var(--success);
+        }
+        
+        .danger .value {
+            color: var(--danger);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(123, 44, 191, 0.1);
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 1rem;
+        }
+        
+        .day-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            aspect-ratio: 1/1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        .day:hover {
+        
+        .day-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+        
+        .day-card.berhasil {
+            background: linear-gradient(135deg, var(--success), #2b9348);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .day-card.gagal {
+            background: linear-gradient(135deg, var(--danger), #9d0208);
+            color: white;
+            border-color: var(--danger);
+        }
+        
         .day-number {
             font-size: 1.2rem;
             font-weight: bold;
-            z-index: 2;
+            margin-bottom: 0.5rem;
         }
+        
         .day-status {
-            font-size: 0.8rem;
-            margin-top: 5px;
-            z-index: 2;
+            font-size: 1.5rem;
         }
-        .success-bg {
-            background: linear-gradient(135deg, var(--success), #1b5e20);
-            color: white;
-        }
-        .fail-bg {
-            background: linear-gradient(135deg, var(--fail), #bf360c);
-            color: white;
-        }
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin: 25px 0;
-            flex-wrap: wrap;
-        }
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: #7b1fa2;
-            transform: scale(1.05);
-        }
-        .btn-secondary {
-            background: #333;
-            color: white;
-        }
-        .btn-secondary:hover {
-            background: #444;
-        }
-        .modal {
-            display: none;
-            position: fixed;
+        
+        .streak-badge {
+            position: absolute;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
+            right: 0;
+            background: gold;
+            color: #333;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-bottom-left-radius: 5px;
         }
-        .modal-content {
-            background: var(--card);
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            animation: modalFadeIn 0.3s;
+        
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+            
+            .date-display {
+                position: static;
+                margin-top: 1rem;
+                display: inline-block;
+            }
+            
+            header {
+                padding-bottom: 2rem;
+            }
         }
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+                gap: 0.7rem;
+            }
+            
+            .day-card {
+                padding: 0.7rem;
+            }
+            
+            .day-number {
+                font-size: 1rem;
+            }
+            
+            .day-status {
+                font-size: 1.2rem;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-card .value {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Animasi */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #f00;
-            border-radius: 50%;
-            animation: fall 5s linear infinite;
+        
+        .animated {
+            animation: fadeIn 0.5s ease forwards;
         }
-        @keyframes fall {
-            to { transform: translateY(100vh); }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 10;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app-container animated">
         <header>
-            <div>
-                <h1><i class="fas fa-calendar-check"></i> No 18+ Tracker</h1>
-                <p>Track your progress with premium analytics</p>
+            <div class="date-display">
+                <span id="current-date"></span>
             </div>
-            <div id="current-date" style="text-align: right;">
-                <div style="font-size: 1.5rem; font-weight: bold;"></div>
-                <div style="opacity: 0.8;"></div>
-            </div>
+            <h1><i class="fas fa-calendar-check"></i> No 18+ Tracker</h1>
+            <p>Pantau kemajuan kebiasaan sehat Anda</p>
         </header>
-
-        <div class="stats-card">
-            <div class="stat">
-                <div>Current Streak</div>
-                <div class="stat-value" id="streak">0 days</div>
-                <div>🔥 Keep going!</div>
+        
+        <div class="main-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Hari</h3>
+                    <div class="value" id="total-hari">0</div>
+                </div>
+                <div class="stat-card success">
+                    <h3>Berhasil</h3>
+                    <div class="value" id="hari-berhasil">0</div>
+                </div>
+                <div class="stat-card danger">
+                    <h3>Gagal</h3>
+                    <div class="value" id="hari-gagal">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Persentase</h3>
+                    <div class="value" id="persentase">0%</div>
+                </div>
             </div>
-            <div class="stat">
-                <div>Success Rate</div>
-                <div class="stat-value success-text" id="success-rate">0%</div>
-                <div>of days clean</div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="tambah-hari">
+                    <i class="fas fa-plus"></i> Tambah Hari
+                </button>
+                <button class="btn btn-outline" id="reset">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
             </div>
-            <div class="stat">
-                <div>Total Days</div>
-                <div class="stat-value" id="total-days">0</div>
-                <div>tracked</div>
-            </div>
-            <div class="stat">
-                <div>Last Week</div>
-                <div class="stat-value" id="last-week">0/7</div>
-                <div>successful days</div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button class="btn-primary" id="add-day">
-                <i class="fas fa-plus"></i> Add Day
-            </button>
-            <button class="btn-secondary" id="reset">
-                <i class="fas fa-redo"></i> Reset
-            </button>
-            <button class="btn-secondary" id="view-stats">
-                <i class="fas fa-chart-bar"></i> Advanced Stats
-            </button>
-        </div>
-
-        <div class="calendar" id="calendar"></div>
-    </div>
-
-    <div class="modal" id="stats-modal">
-        <div class="modal-content">
-            <h2 style="margin-top: 0;"><i class="fas fa-chart-pie"></i> Advanced Statistics</h2>
-            <div id="advanced-stats">
-                <p>Longest streak: <span id="longest-streak">0 days</span></p>
-                <p>Success days: <span id="total-success">0</span></p>
-                <p>Fail days: <span id="total-fail">0</span></p>
-                <p>Best month: <span id="best-month">-</span></p>
-            </div>
-            <div style="text-align: right; margin-top: 20px;">
-                <button class="btn-primary" id="close-modal">Close</button>
-            </div>
+            
+            <div class="calendar-grid" id="kalender"></div>
         </div>
     </div>
 
     <script>
         // Data
-        let days = [];
+        let hari = [];
         let currentStreak = 0;
         let longestStreak = 0;
-
-        // Elements
-        const calendarEl = document.getElementById('calendar');
-        const addDayBtn = document.getElementById('add-day');
+        
+        // Elemen HTML
+        const kalenderEl = document.getElementById('kalender');
+        const tambahHariBtn = document.getElementById('tambah-hari');
         const resetBtn = document.getElementById('reset');
-        const viewStatsBtn = document.getElementById('view-stats');
-        const modal = document.getElementById('stats-modal');
-        const closeModalBtn = document.getElementById('close-modal');
         const currentDateEl = document.getElementById('current-date');
-
-        // Update current date
-        function updateCurrentDate() {
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            currentDateEl.children[0].textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            currentDateEl.children[1].textContent = now.toLocaleDateString('en-US', { year: 'numeric' });
+        
+        // Format tanggal
+        function formatTanggal() {
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            return new Date().toLocaleDateString('id-ID', options);
         }
-
-        // Create confetti effect
-        function createConfetti() {
-            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
-            for (let i = 0; i < 100; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.width = Math.random() * 10 + 5 + 'px';
-                confetti.style.height = confetti.style.width;
-                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
-                document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 5000);
-            }
-        }
-
-        // Update stats
-        function updateStats() {
-            const successDays = days.filter(day => day.status === 'success').length;
-            const failDays = days.filter(day => day.status === 'fail').length;
-            const totalDays = days.length;
-            const successRate = totalDays > 0 ? Math.round((successDays / totalDays) * 100) : 0;
+        
+        // Update statistik
+        function updateStatistik() {
+            const total = hari.length;
+            const berhasil = hari.filter(h => h.status === 'berhasil').length;
+            const gagal = hari.filter(h => h.status === 'gagal').length;
+            const persen = total > 0 ? Math.round((berhasil / total) * 100) : 0;
             
-            // Calculate current streak
+            // Hitung streak
             currentStreak = 0;
-            for (let i = days.length - 1; i >= 0; i--) {
-                if (days[i].status === 'success') {
+            for (let i = hari.length - 1; i >= 0; i--) {
+                if (hari[i].status === 'berhasil') {
                     currentStreak++;
                 } else {
                     break;
@@ -297,90 +366,78 @@
             // Update longest streak
             if (currentStreak > longestStreak) {
                 longestStreak = currentStreak;
-                if (currentStreak % 5 === 0 && currentStreak > 0) {
-                    createConfetti();
-                }
             }
-
-            // Last week stats (last 7 days)
-            const lastWeekDays = days.slice(-7);
-            const lastWeekSuccess = lastWeekDays.filter(day => day.status === 'success').length;
-
-            // Update DOM
-            document.getElementById('streak').textContent = currentStreak + (currentStreak === 1 ? ' day' : ' days');
-            document.getElementById('success-rate').textContent = successRate + '%';
-            document.getElementById('total-days').textContent = totalDays;
-            document.getElementById('last-week').textContent = lastWeekSuccess + '/7';
             
-            // Advanced stats
-            document.getElementById('longest-streak').textContent = longestStreak + (longestStreak === 1 ? ' day' : ' days');
-            document.getElementById('total-success').textContent = successDays;
-            document.getElementById('total-fail').textContent = failDays;
+            // Update DOM
+            document.getElementById('total-hari').textContent = total;
+            document.getElementById('hari-berhasil').textContent = berhasil;
+            document.getElementById('hari-gagal').textContent = gagal;
+            document.getElementById('persentase').textContent = persen + '%';
         }
-
-        // Render calendar
-        function renderCalendar() {
-            calendarEl.innerHTML = '';
-            days.forEach((day, index) => {
+        
+        // Gambar kalender
+        function gambarKalender() {
+            kalenderEl.innerHTML = '';
+            
+            hari.forEach((item, index) => {
                 const dayEl = document.createElement('div');
-                dayEl.className = 'day';
-                dayEl.classList.add(day.status ? day.status + '-bg' : '');
+                dayEl.className = 'day-card';
+                if (item.status) dayEl.classList.add(item.status);
                 
-                dayEl.innerHTML = `
-                    <div class="day-number">${index + 1}</div>
-                    <div class="day-status">${day.status ? (day.status === 'success' ? '✅' : '❌') : ''}</div>
+                // Tambah badge streak jika >= 3 hari berturut-turut
+                if (item.status === 'berhasil' && currentStreak >= 3 && 
+                    index >= hari.length - currentStreak) {
+                    const streakValue = currentStreak - (hari.length - 1 - index);
+                    dayEl.innerHTML += `<span class="streak-badge">${streakValue}🔥</span>`;
+                }
+                
+                dayEl.innerHTML += `
+                    <div class="day-number">Hari ${index + 1}</div>
+                    <div class="day-status">${item.status === 'berhasil' ? '✅' : item.status === 'gagal' ? '❌' : ''}</div>
                 `;
                 
                 dayEl.addEventListener('click', () => {
-                    if (!day.status) {
-                        day.status = 'success';
-                    } else if (day.status === 'success') {
-                        day.status = 'fail';
+                    if (!item.status) {
+                        item.status = 'berhasil';
+                    } else if (item.status === 'berhasil') {
+                        item.status = 'gagal';
                     } else {
-                        day.status = '';
+                        item.status = '';
                     }
-                    renderCalendar();
-                    updateStats();
+                    gambarKalender();
+                    updateStatistik();
                 });
                 
-                calendarEl.appendChild(dayEl);
+                kalenderEl.appendChild(dayEl);
             });
         }
-
+        
         // Event listeners
-        addDayBtn.addEventListener('click', () => {
-            days.push({ status: '' });
-            renderCalendar();
-            updateStats();
+        tambahHariBtn.addEventListener('click', () => {
+            hari.push({ status: '' });
+            gambarKalender();
+            updateStatistik();
         });
-
+        
         resetBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset all progress?')) {
-                days = [];
+            if (confirm('Yakin ingin mengatur ulang semua progres?')) {
+                hari = [];
                 currentStreak = 0;
                 longestStreak = 0;
-                renderCalendar();
-                updateStats();
+                gambarKalender();
+                updateStatistik();
             }
         });
-
-        viewStatsBtn.addEventListener('click', () => {
-            modal.style.display = 'flex';
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        // Initialize
-        updateCurrentDate();
-        updateStats();
-
-        // Add 7 days by default
+        
+        // Inisialisasi
+        currentDateEl.textContent = formatTanggal();
+        
+        // Tambah 7 hari pertama otomatis
         for (let i = 0; i < 7; i++) {
-            days.push({ status: '' });
+            hari.push({ status: '' });
         }
-        renderCalendar();
+        gambarKalender();
+        updateStatistik();
     </script>
 </body>
 </html>
