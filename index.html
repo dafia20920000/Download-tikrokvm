@@ -1,177 +1,386 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalender No 18+</title>
+    <title>No 18+ • Premium Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary: #8a2be2;
+            --success: #00c853;
+            --fail: #ff3d00;
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+        }
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             margin: 0;
             padding: 20px;
-            color: #333;
+            min-height: 100vh;
         }
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
         }
         h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, #8a2be2, #4b0082);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stats-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .stat {
             text-align: center;
-            color: #4a148c;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .success-text { color: var(--success); }
+        .fail-text { color: var(--fail); }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .day {
+            aspect-ratio: 1/1;
+            background: var(--card);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .day:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+        }
+        .day-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+        .day-status {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            z-index: 2;
+        }
+        .success-bg {
+            background: linear-gradient(135deg, var(--success), #1b5e20);
+            color: white;
+        }
+        .fail-bg {
+            background: linear-gradient(135deg, var(--fail), #bf360c);
+            color: white;
         }
         .controls {
             display: flex;
             gap: 10px;
-            margin: 20px 0;
+            margin: 25px 0;
             flex-wrap: wrap;
         }
         button {
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 5px;
-            background: #4a148c;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
             color: white;
-            cursor: pointer;
         }
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 10px;
-        }
-        .hari {
-            background: #e0e0e0;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .hari:hover {
+        .btn-primary:hover {
+            background: #7b1fa2;
             transform: scale(1.05);
         }
-        .berhasil {
-            background: #4caf50;
+        .btn-secondary {
+            background: #333;
             color: white;
         }
-        .gagal {
-            background: #f44336;
-            color: white;
+        .btn-secondary:hover {
+            background: #444;
         }
-        .statistik {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-radius: 5px;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
         }
-        @media (max-width: 600px) {
-            .calendar {
-                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            }
-            .hari {
-                padding: 8px 5px;
-                font-size: 14px;
-            }
+        .modal-content {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            animation: modalFadeIn 0.3s;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f00;
+            border-radius: 50%;
+            animation: fall 5s linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📅 Kalender No 18+</h1>
-        
-        <div class="controls">
-            <button id="tambah-hari">➕ Tambah Hari</button>
-            <button id="reset">🔄 Reset</button>
+        <header>
+            <div>
+                <h1><i class="fas fa-calendar-check"></i> No 18+ Tracker</h1>
+                <p>Track your progress with premium analytics</p>
+            </div>
+            <div id="current-date" style="text-align: right;">
+                <div style="font-size: 1.5rem; font-weight: bold;"></div>
+                <div style="opacity: 0.8;"></div>
+            </div>
+        </header>
+
+        <div class="stats-card">
+            <div class="stat">
+                <div>Current Streak</div>
+                <div class="stat-value" id="streak">0 days</div>
+                <div>🔥 Keep going!</div>
+            </div>
+            <div class="stat">
+                <div>Success Rate</div>
+                <div class="stat-value success-text" id="success-rate">0%</div>
+                <div>of days clean</div>
+            </div>
+            <div class="stat">
+                <div>Total Days</div>
+                <div class="stat-value" id="total-days">0</div>
+                <div>tracked</div>
+            </div>
+            <div class="stat">
+                <div>Last Week</div>
+                <div class="stat-value" id="last-week">0/7</div>
+                <div>successful days</div>
+            </div>
         </div>
-        
-        <div class="calendar" id="kalender"></div>
-        
-        <div class="statistik">
-            <h3>Statistik:</h3>
-            <p>Total Hari: <span id="total-hari">0</span></p>
-            <p>Berhasil: <span id="hari-berhasil">0</span></p>
-            <p>Gagal: <span id="hari-gagal">0</span></p>
-            <p>Persentase: <span id="persentase">0%</span></p>
+
+        <div class="controls">
+            <button class="btn-primary" id="add-day">
+                <i class="fas fa-plus"></i> Add Day
+            </button>
+            <button class="btn-secondary" id="reset">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+            <button class="btn-secondary" id="view-stats">
+                <i class="fas fa-chart-bar"></i> Advanced Stats
+            </button>
+        </div>
+
+        <div class="calendar" id="calendar"></div>
+    </div>
+
+    <div class="modal" id="stats-modal">
+        <div class="modal-content">
+            <h2 style="margin-top: 0;"><i class="fas fa-chart-pie"></i> Advanced Statistics</h2>
+            <div id="advanced-stats">
+                <p>Longest streak: <span id="longest-streak">0 days</span></p>
+                <p>Success days: <span id="total-success">0</span></p>
+                <p>Fail days: <span id="total-fail">0</span></p>
+                <p>Best month: <span id="best-month">-</span></p>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn-primary" id="close-modal">Close</button>
+            </div>
         </div>
     </div>
 
     <script>
         // Data
-        let hari = [];
-        
-        // Elemen HTML
-        const kalenderEl = document.getElementById('kalender');
-        const tambahHariBtn = document.getElementById('tambah-hari');
+        let days = [];
+        let currentStreak = 0;
+        let longestStreak = 0;
+
+        // Elements
+        const calendarEl = document.getElementById('calendar');
+        const addDayBtn = document.getElementById('add-day');
         const resetBtn = document.getElementById('reset');
-        
-        // Fungsi update statistik
-        function updateStatistik() {
-            const total = hari.length;
-            const berhasil = hari.filter(h => h.status === 'berhasil').length;
-            const gagal = hari.filter(h => h.status === 'gagal').length;
-            const persen = total > 0 ? Math.round((berhasil / total) * 100) : 0;
-            
-            document.getElementById('total-hari').textContent = total;
-            document.getElementById('hari-berhasil').textContent = berhasil;
-            document.getElementById('hari-gagal').textContent = gagal;
-            document.getElementById('persentase').textContent = persen + '%';
+        const viewStatsBtn = document.getElementById('view-stats');
+        const modal = document.getElementById('stats-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const currentDateEl = document.getElementById('current-date');
+
+        // Update current date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateEl.children[0].textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+            currentDateEl.children[1].textContent = now.toLocaleDateString('en-US', { year: 'numeric' });
         }
-        
-        // Fungsi gambar kalender
-        function gambarKalender() {
-            kalenderEl.innerHTML = '';
+
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = confetti.style.width;
+                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const successDays = days.filter(day => day.status === 'success').length;
+            const failDays = days.filter(day => day.status === 'fail').length;
+            const totalDays = days.length;
+            const successRate = totalDays > 0 ? Math.round((successDays / totalDays) * 100) : 0;
             
-            hari.forEach((item, index) => {
-                const hariEl = document.createElement('div');
-                hariEl.className = 'hari';
-                if (item.status) hariEl.classList.add(item.status);
+            // Calculate current streak
+            currentStreak = 0;
+            for (let i = days.length - 1; i >= 0; i--) {
+                if (days[i].status === 'success') {
+                    currentStreak++;
+                } else {
+                    break;
+                }
+            }
+            
+            // Update longest streak
+            if (currentStreak > longestStreak) {
+                longestStreak = currentStreak;
+                if (currentStreak % 5 === 0 && currentStreak > 0) {
+                    createConfetti();
+                }
+            }
+
+            // Last week stats (last 7 days)
+            const lastWeekDays = days.slice(-7);
+            const lastWeekSuccess = lastWeekDays.filter(day => day.status === 'success').length;
+
+            // Update DOM
+            document.getElementById('streak').textContent = currentStreak + (currentStreak === 1 ? ' day' : ' days');
+            document.getElementById('success-rate').textContent = successRate + '%';
+            document.getElementById('total-days').textContent = totalDays;
+            document.getElementById('last-week').textContent = lastWeekSuccess + '/7';
+            
+            // Advanced stats
+            document.getElementById('longest-streak').textContent = longestStreak + (longestStreak === 1 ? ' day' : ' days');
+            document.getElementById('total-success').textContent = successDays;
+            document.getElementById('total-fail').textContent = failDays;
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            calendarEl.innerHTML = '';
+            days.forEach((day, index) => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'day';
+                dayEl.classList.add(day.status ? day.status + '-bg' : '');
                 
-                hariEl.innerHTML = `
-                    <div>Hari ${index + 1}</div>
-                    <div>${item.status === 'berhasil' ? '✅' : item.status === 'gagal' ? '❌' : ''}</div>
+                dayEl.innerHTML = `
+                    <div class="day-number">${index + 1}</div>
+                    <div class="day-status">${day.status ? (day.status === 'success' ? '✅' : '❌') : ''}</div>
                 `;
                 
-                hariEl.addEventListener('click', () => {
-                    if (!item.status) {
-                        item.status = 'berhasil';
-                    } else if (item.status === 'berhasil') {
-                        item.status = 'gagal';
+                dayEl.addEventListener('click', () => {
+                    if (!day.status) {
+                        day.status = 'success';
+                    } else if (day.status === 'success') {
+                        day.status = 'fail';
                     } else {
-                        item.status = '';
+                        day.status = '';
                     }
-                    gambarKalender();
-                    updateStatistik();
+                    renderCalendar();
+                    updateStats();
                 });
                 
-                kalenderEl.appendChild(hariEl);
+                calendarEl.appendChild(dayEl);
             });
         }
-        
+
         // Event listeners
-        tambahHariBtn.addEventListener('click', () => {
-            hari.push({ status: '' });
-            gambarKalender();
-            updateStatistik();
+        addDayBtn.addEventListener('click', () => {
+            days.push({ status: '' });
+            renderCalendar();
+            updateStats();
         });
-        
+
         resetBtn.addEventListener('click', () => {
-            if (confirm('Yakin ingin reset semua progress?')) {
-                hari = [];
-                gambarKalender();
-                updateStatistik();
+            if (confirm('Are you sure you want to reset all progress?')) {
+                days = [];
+                currentStreak = 0;
+                longestStreak = 0;
+                renderCalendar();
+                updateStats();
             }
         });
-        
-        // Tambah 7 hari pertama otomatis
+
+        viewStatsBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Initialize
+        updateCurrentDate();
+        updateStats();
+
+        // Add 7 days by default
         for (let i = 0; i < 7; i++) {
-            hari.push({ status: '' });
+            days.push({ status: '' });
         }
-        gambarKalender();
-        updateStatistik();
+        renderCalendar();
     </script>
 </body>
 </html>
